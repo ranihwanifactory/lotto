@@ -16,6 +16,10 @@ const App: React.FC = () => {
   const [aiWish, setAiWish] = useState('');
   const [activeTab, setActiveTab] = useState<'AUTO' | 'AI'>('AUTO');
   const [drawInfo, setDrawInfo] = useState<{date: Date, round: number} | null>(null);
+  
+  // PWA Install State
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [showInstallBtn, setShowInstallBtn] = useState(false);
 
   // Animation references
   const intervalRef = useRef<number | null>(null);
@@ -26,6 +30,19 @@ const App: React.FC = () => {
 
   useEffect(() => {
     setDrawInfo(getNextDrawInfo());
+
+    // PWA Install Event Listener
+    const handleBeforeInstallPrompt = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShowInstallBtn(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
   }, []);
 
   // Effect to clear interval on unmount
@@ -103,6 +120,38 @@ const App: React.FC = () => {
     }
   };
 
+  // PWA Install Action
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setShowInstallBtn(false);
+    }
+    setDeferredPrompt(null);
+  };
+
+  // Share Action
+  const handleShare = async () => {
+    const shareData = {
+      title: '행운의 로또 6/45 AI',
+      text: `제 ${drawInfo?.round || ''}회차 로또 당첨 기원! AI가 추천해준 행운의 번호를 확인해보세요.`,
+      url: window.location.href,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        console.log('Sharing failed', err);
+      }
+    } else {
+      // Fallback for desktop or unsupported browsers
+      navigator.clipboard.writeText(window.location.href);
+      alert('주소가 복사되었습니다! 친구들에게 공유해보세요.');
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-gray-800">
       {/* Official Style Header */}
@@ -117,23 +166,53 @@ const App: React.FC = () => {
                 <span className="text-[10px] text-blue-600 font-bold tracking-wide">OFFICIAL SIMULATOR</span>
             </div>
           </div>
-          {drawInfo && (
-             <div className="flex flex-col items-end">
-               <div className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded text-[10px] font-bold mb-0.5">
-                 다가오는 추첨
-               </div>
-               <div className="text-right">
-                 <span className="text-sm font-bold text-gray-900 mr-1">제 {drawInfo.round}회</span>
-                 <span className="text-xs text-gray-500 block">{formatDrawDate(drawInfo.date)}</span>
-               </div>
-             </div>
-          )}
+          
+          <div className="flex items-center gap-2">
+            {/* Action Buttons (Install & Share) */}
+            {showInstallBtn && (
+               <button 
+                 onClick={handleInstallClick}
+                 className="hidden sm:flex items-center gap-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-full text-xs font-bold transition-colors"
+               >
+                 <span>⬇️</span> 앱 설치
+               </button>
+            )}
+            <button 
+              onClick={handleShare}
+              className="p-2 rounded-full hover:bg-gray-100 transition-colors text-gray-500"
+              aria-label="공유하기"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+              </svg>
+            </button>
+          </div>
         </div>
       </header>
+
+      {/* Draw Info Sub-header (Mobile friendly) */}
+      {drawInfo && (
+        <div className="bg-blue-600 text-white py-2 px-4 text-center shadow-inner">
+          <p className="text-sm font-medium opacity-90">
+            <span className="bg-blue-800 px-2 py-0.5 rounded text-xs font-bold mr-2 text-yellow-300">NEXT</span>
+             제 <span className="font-bold text-lg">{drawInfo.round}</span>회차 추첨일: {formatDrawDate(drawInfo.date)}
+          </p>
+        </div>
+      )}
 
       {/* Main Content */}
       <main className="flex-1 w-full max-w-lg mx-auto p-4 flex flex-col items-center">
         
+        {/* Mobile Install Button (Visible only on mobile if installable) */}
+        {showInstallBtn && (
+            <button 
+                onClick={handleInstallClick}
+                className="sm:hidden w-full mb-4 bg-gray-900 text-white py-3 rounded-xl text-sm font-bold shadow-lg flex items-center justify-center gap-2 animate-fade-in"
+            >
+                <span>📲</span> 앱으로 설치하고 매주 알림 받기
+            </button>
+        )}
+
         {/* Display Area */}
         <section className="w-full bg-white rounded-3xl shadow-xl border border-gray-100 p-6 mb-6 relative overflow-hidden">
            {/* Decorative background elements */}
@@ -235,6 +314,10 @@ const App: React.FC = () => {
         <div className="max-w-lg mx-auto">
             <p className="font-medium mb-1">본 서비스는 동행복권의 공식 서비스가 아닙니다.</p>
             <p>재미를 위한 시뮬레이터이며, 실제 당첨을 보장하지 않습니다.</p>
+            <div className="flex justify-center gap-4 mt-4 opacity-70">
+              <button onClick={handleShare} className="hover:text-blue-500 underline">친구에게 공유하기</button>
+              {showInstallBtn && <button onClick={handleInstallClick} className="hover:text-blue-500 underline">앱 설치하기</button>}
+            </div>
             <p className="mt-4 text-[10px] opacity-70">Powered by Google Gemini AI</p>
         </div>
       </footer>

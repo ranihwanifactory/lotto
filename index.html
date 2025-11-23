@@ -2,15 +2,44 @@
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="https://www.w3.org/2000/svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>행운의 로또 6/45 AI</title>
+    <link rel="icon" type="image/svg+xml" href="https://cdn-icons-png.flaticon.com/512/1041/1041168.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    
+    <!-- SEO & Meta Tags -->
+    <title>행운의 로또 6/45 AI - 인공지능 번호 추천</title>
+    <meta name="description" content="최신 AI 기술로 분석한 이번 주 로또 행운 번호를 무료로 받아보세요. 공식 앱 스타일의 깔끔한 디자인과 제미나이 AI의 소원 분석 기능 제공." />
+    <meta name="keywords" content="로또, 로또번호생성, 로또추천, AI로또, 무료로또, 로또명당, 로또645, Gemini" />
+    <meta name="author" content="Lotto AI" />
+    
+    <!-- Open Graph (Social Media Sharing) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="행운의 로또 6/45 AI" />
+    <meta property="og:description" content="당신의 소원을 AI가 분석하여 행운의 번호를 추천해드립니다. 이번 주 1등은 바로 당신!" />
+    <meta property="og:image" content="https://cdn-icons-png.flaticon.com/512/1041/1041168.png" />
+    <meta property="og:url" content="https://lotto-ai-gen.web.app" />
+    <meta property="og:site_name" content="행운의 로또 6/45 AI" />
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="행운의 로또 6/45 AI" />
+    <meta name="twitter:description" content="AI가 추천하는 로또 행운 번호. 지금 바로 확인하세요." />
+    <meta name="twitter:image" content="https://cdn-icons-png.flaticon.com/512/1041/1041168.png" />
+
+    <!-- PWA & Mobile Web App Capabilties -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="로또AI" />
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1041/1041168.png" />
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <style>
       body {
         font-family: 'Noto Sans KR', sans-serif;
         background-color: #f3f4f6;
+        -webkit-tap-highlight-color: transparent;
       }
       .ball-shadow {
         box-shadow: inset -2px -2px 6px rgba(0,0,0,0.3), 2px 2px 4px rgba(0,0,0,0.2);
@@ -33,6 +62,16 @@
 </head>
   <body>
     <div id="root"></div>
+    <script>
+      // Basic Service Worker Registration for PWA
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          // In a real build environment, this would point to a sw.js file.
+          // Since this is a demo environment, we primarily rely on the manifest for PWA features.
+          console.log('Service Worker supported');
+        });
+      }
+    </script>
   <script type="module" src="/index.tsx"></script>
 </body>
 </html>
